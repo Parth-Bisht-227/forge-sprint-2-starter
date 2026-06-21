@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\MemberController;
 
-// Removed Route::prefix('api') because Laravel routes in api.php are already prefixed with /api by the framework
 // Boards
 Route::apiResource('boards', BoardController::class);
 
