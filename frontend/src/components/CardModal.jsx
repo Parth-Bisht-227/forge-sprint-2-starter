@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
@@ -9,8 +9,34 @@ function CardModal({ card, onClose, refreshBoard }) {
     description: card.description || '',
     due_date: card.due_date || '',
   });
-  const [tags, setTags] = useState(card.tags || []);
-  const [members, setMembers] = useState(card.members || []);
+  const [tags, setTags] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+  const [allMembers, setAllMembers] = useState([]);
+  
+  const [newTag, setNewTag] = useState({ name: '', color: '#3b82f6' });
+  const [newMember, setNewMember] = useState({ name: '' });
+
+  useEffect(() => {
+    // Load current card associations
+    setTags(card.tags || []);
+    setMembers(card.members || []);
+    
+    // Load all available tags and members for pickers
+    const fetchData = async () => {
+      try {
+        const [tRes, mRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/tags`),
+          axios.get(`${API_BASE_URL}/members`)
+        ]);
+        setAllTags(tRes.data);
+        setAllMembers(mRes.data);
+      } catch (err) {
+        console.error("Failed to load tags/members", err);
+      }
+    };
+    fetchData();
+  }, [card]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -26,6 +52,7 @@ function CardModal({ card, onClose, refreshBoard }) {
   const syncTags = async (tagIds) => {
     try {
       await axios.post(`${API_BASE_URL}/cards/${card.id}/tags`, { tag_ids: tagIds });
+      setTags(tagIds.map(id => allTags.find(t => t.id === id)));
       refreshBoard();
     } catch (err) {
       alert("Error syncing tags");
@@ -35,74 +62,167 @@ function CardModal({ card, onClose, refreshBoard }) {
   const syncMembers = async (memberIds) => {
     try {
       await axios.post(`${API_BASE_URL}/cards/${card.id}/members`, { member_ids: memberIds });
+      setMembers(memberIds.map(m => allMembers.find(mem => mem.id === m)));
       refreshBoard();
     } catch (err) {
       alert("Error syncing members");
     }
   };
 
+  const createTag = async (e) => {
+    e.preventDefault();
+    if (!newTag.name) return;
+    try {
+      const res = await axios.post(`${API_BASE_URL}/tags`, newTag);
+      setAllTags([...allTags, res.data]);
+      setNewTag({ name: '', color: '#3b82f6' });
+      // Automatically sync the newly created tag to this card
+      syncTags([...tags.map(t => t.id), res.data.id]);
+    } catch (err) {
+      alert("Error creating tag");
+    }
+  };
+
+  const createMember = async (e) => {
+    e.preventDefault();
+    if (!newMember.name) return;
+    try {
+      const res = await axios.post(`${API_BASE_URL}/members`, newMember);
+      setAllMembers([...allMembers, res.data]);
+      setNewMember({ name: '' });
+      syncMembers([...members.map(m => m.id), res.data.id]);
+    } catch (err) {
+      alert("Error creating member");
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-md p-6 overflow-y-auto max-h-[90vh]">
-        <h2 className="text-xl font-bold mb-4">Edit Card</h2>
-        <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white rounded-xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh] shadow-2xl">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold">Edit Card</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        
+        <form onSubmit={handleUpdate} className="flex flex-col gap-6">
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase">Title</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Title</label>
             <input 
-              className="w-full p-2 border rounded" 
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none" 
               value={formData.title} 
               onChange={e => setFormData({...formData, title: e.target.value})} 
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase">Description</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
             <textarea 
-              className="w-full p-2 border rounded" 
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none h-24" 
               value={formData.description} 
               onChange={e => setFormData({...formData, description: e.target.value})} 
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase">Due Date</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Due Date</label>
             <input 
               type="datetime-local" 
-              className="w-full p-2 border rounded" 
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none" 
               value={formData.due_date} 
               onChange={e => setFormData({...formData, due_date: e.target.value})} 
             />
           </div>
           
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Tags (IDs)</label>
-            <input 
-              className="w-full p-2 border rounded" 
-              placeholder="1,2,3" 
-              onChange={e => syncTags(e.target.value.split(',').map(v => v.trim()).filter(v => v).map(Number))} 
-            />
-            <p className="text-[10px] text-gray-400 mt-1">Comma separated IDs. Updates instantly.</p>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Tags</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {tags.map(t => (
+                <span key={t.id} className="text-xs px-2 py-1 rounded-full text-white" style={{backgroundColor: t.color}}>
+                  {t.name}
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              {allTags.map(t => (
+                <label key={t.id} className="flex items-center gap-2 text-xs cursor-pointer p-1 hover:bg-gray-50 rounded">
+                  <input 
+                    type="checkbox" 
+                    checked={tags.some(existing => existing.id === t.id)} 
+                    onChange={e => {
+                      const newIds = e.target.checked 
+                        ? [...tags.map(existing => existing.id), t.id]
+                        : tags.filter(existing => existing.id !== t.id).map(existing => existing.id);
+                      syncTags(newIds);
+                    }} 
+                  />
+                  <span className="w-2 h-2 rounded-full" style={{backgroundColor: t.color}}></span>
+                  {t.name}
+                </label>
+              ))}
+            </div>
+            <form onSubmit={createTag} className="flex gap-2">
+              <input 
+                className="flex-grow p-1 text-xs border rounded" 
+                value={newTag.name} 
+                onChange={e => setNewTag({...newTag, name: e.target.value})} 
+                placeholder="New Tag Name" 
+              />
+              <input 
+                type="color" 
+                className="w-8 h-6 p-0 border-none bg-transparent" 
+                value={newTag.color} 
+                onChange={e => setNewTag({...newTag, color: e.target.value})} 
+              />
+              <button className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Add</button>
+            </form>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Members (IDs)</label>
-            <input 
-              className="w-full p-2 border rounded" 
-              placeholder="1,2,3" 
-              onChange={e => syncMembers(e.target.value.split(',').map(v => v.trim()).filter(v => v).map(Number))} 
-            />
-            <p className="text-[10px] text-gray-400 mt-1">Comma separated IDs. Updates instantly.</p>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Members</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {members.map(m => (
+                <span key={m.id} className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">
+                  {m.name}
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              {allMembers.map(m => (
+                <label key={m.id} className="flex items-center gap-2 text-xs cursor-pointer p-1 hover:bg-gray-50 rounded">
+                  <input 
+                    type="checkbox" 
+                    checked={members.some(existing => existing.id === m.id)} 
+                    onChange={e => {
+                      const newIds = e.target.checked 
+                        ? [...members.map(existing => existing.id), m.id]
+                        : members.filter(existing => existing.id !== m.id).map(existing => existing.id);
+                      syncMembers(newIds);
+                    }} 
+                  />
+                  {m.name}
+                </label>
+              ))}
+            </div>
+            <form onSubmit={createMember} className="flex gap-2">
+              <input 
+                className="flex-grow p-1 text-xs border rounded" 
+                value={newMember.name} 
+                onChange={e => setNewMember({name: e.target.value})} 
+                placeholder="New Member Name" 
+              />
+              <button className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Add</button>
+            </form>
           </div>
 
           <div className="flex justify-end gap-2 mt-6">
             <button 
               type="button" 
               onClick={onClose} 
-              className="px-4 py-2 text-gray-500 hover:text-gray-700"
+              className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium"
             >
               Cancel
             </button>
             <button 
               type="submit" 
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm"
             >
               Save Changes
             </button>

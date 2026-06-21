@@ -60,18 +60,19 @@ function KanbanBoard({ boardId, onBack }) {
             key={list.id} 
             list={list} 
             refreshBoard={fetchBoard} 
+            allLists={board.lists} 
           />
         ))}
         <form onSubmit={createList} className="w-60 flex flex-col gap-2">
           <input 
-            className="p-2 text-sm rounded border bg-white shadow-sm" 
+            className="p-2 text-sm rounded border bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" 
             value={newListName} 
             onChange={e => setNewListName(e.target.value)} 
             placeholder="+ Add List" 
           />
           <button 
             type="submit" 
-            className="text-xs bg-gray-300 p-1 rounded hover:bg-gray-400 text-gray-700"
+            className="text-xs bg-gray-300 p-1 rounded hover:bg-gray-400 text-gray-700 font-medium"
           >
             Add List
           </button>

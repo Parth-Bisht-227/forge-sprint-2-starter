@@ -23,3 +23,9 @@ Route::apiResource('cards', CardController::class)->except(['index']);
 Route::patch('cards/{id}/move', [CardController::class, 'move']);
 Route::post('cards/{id}/tags', [CardController::class, 'syncTags']);
 Route::post('cards/{id}/members', [CardController::class, 'syncMembers']);
+
+// Global Lookups
+Route::get('tags', [TagController::class, 'index']);
+Route::post('tags', [TagController::class, 'store']);
+Route::get('members', [MemberController::class, 'index']);
+Route::post('members', [MemberController::class, 'store']);
