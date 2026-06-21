@@ -21,6 +21,6 @@ class BoardList extends Model
 
     public function cards(): HasMany
     {
-        return $this->hasMany(Card::class);
+        return $this->hasMany(Card::class, 'list_id');
     }
 }
