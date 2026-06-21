@@ -32,3 +32,8 @@ The infrastructure drift between the orchestrator and delegated subagents is dee
 - None.
 
 **Note:** Git push initially failed due to GitHub HTTPS requiring a Personal Access Token instead of account password, which was resolved by regenerating a token and enabling credential.helper store.
+
+## Known limitation: Hermes delegate_task
+Hermes' built-in delegate_task consistently resolves to the wrong filesystem path (Windows path instead of the WSL OpenClaw workspace) and cannot reliably hand off implementation work. This is a platform-level transport issue between Hermes (Windows) and OpenClaw (WSL2), not a configuration error — confirmed via direct testing. 
+
+**Workaround:** human-relayed handoff in Slack — Hermes plans in <#C0BBWE3S7L5>, human relays the approved plan to OpenClaw in <#C0BC1MT7RUZ>, OpenClaw implements and reports back. This preserves the full plan→code→report loop with full visibility, just with a human carrying the message instead of an automated subagent call.
