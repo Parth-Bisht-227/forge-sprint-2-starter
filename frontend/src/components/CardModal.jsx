@@ -18,11 +18,9 @@ function CardModal({ card, onClose, refreshBoard }) {
   const [newMember, setNewMember] = useState({ name: '' });
 
   useEffect(() => {
-    // Load current card associations
     setTags(card.tags || []);
     setMembers(card.members || []);
     
-    // Load all available tags and members for pickers
     const fetchData = async () => {
       try {
         const [tRes, mRes] = await Promise.all([
@@ -52,7 +50,7 @@ function CardModal({ card, onClose, refreshBoard }) {
   const syncTags = async (tagIds) => {
     try {
       await axios.post(`${API_BASE_URL}/cards/${card.id}/tags`, { tag_ids: tagIds });
-      setTags(tagIds.map(id => allTags.find(t => t.id === id)));
+      setTags(tagIds.map(id => allTags.find(t => t.id === id) || { id, name: 'Loading...' }));
       refreshBoard();
     } catch (err) {
       alert("Error syncing tags");
@@ -62,29 +60,26 @@ function CardModal({ card, onClose, refreshBoard }) {
   const syncMembers = async (memberIds) => {
     try {
       await axios.post(`${API_BASE_URL}/cards/${card.id}/members`, { member_ids: memberIds });
-      setMembers(memberIds.map(m => allMembers.find(mem => mem.id === m)));
+      setMembers(memberIds.map(id => allMembers.find(m => m.id === id) || { id, name: 'Loading...' }));
       refreshBoard();
     } catch (err) {
       alert("Error syncing members");
     }
   };
 
-  const createTag = async (e) => {
-    e.preventDefault();
+  const handleCreateTag = async () => {
     if (!newTag.name) return;
     try {
       const res = await axios.post(`${API_BASE_URL}/tags`, newTag);
       setAllTags([...allTags, res.data]);
       setNewTag({ name: '', color: '#3b82f6' });
-      // Automatically sync the newly created tag to this card
       syncTags([...tags.map(t => t.id), res.data.id]);
     } catch (err) {
       alert("Error creating tag");
     }
   };
 
-  const createMember = async (e) => {
-    e.preventDefault();
+  const handleCreateMember = async () => {
     if (!newMember.name) return;
     try {
       const res = await axios.post(`${API_BASE_URL}/members`, newMember);
@@ -105,42 +100,44 @@ function CardModal({ card, onClose, refreshBoard }) {
         </div>
         
         <form onSubmit={handleUpdate} className="flex flex-col gap-6">
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Title</label>
-            <input 
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none" 
-              value={formData.title} 
-              onChange={e => setFormData({...formData, title: e.target.value})} 
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
-            <textarea 
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none h-24" 
-              value={formData.description} 
-              onChange={e => setFormData({...formData, description: e.target.value})} 
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Due Date</label>
-            <input 
-              type="datetime-local" 
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none" 
-              value={formData.due_date} 
-              onChange={e => setFormData({...formData, due_date: e.target.value})} 
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Title</label>
+              <input 
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none" 
+                value={formData.title} 
+                onChange={e => setFormData({...formData, title: e.target.value})} 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
+              <textarea 
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none h-24" 
+                value={formData.description} 
+                onChange={e => setFormData({...formData, description: e.target.value})} 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Due Date</label>
+              <input 
+                type="datetime-local" 
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none" 
+                value={formData.due_date} 
+                onChange={e => setFormData({...formData, due_date: e.target.value})} 
+              />
+            </div>
           </div>
           
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Tags</label>
-            <div className="flex flex-wrap gap-2 mb-3">
+          <div className="space-y-3">
+            <label className="block text-xs font-bold text-gray-500 uppercase">Tags</label>
+            <div className="flex flex-wrap gap-2">
               {tags.map(t => (
                 <span key={t.id} className="text-xs px-2 py-1 rounded-full text-white" style={{backgroundColor: t.color}}>
                   {t.name}
                 </span>
               ))}
             </div>
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-1 border rounded">
               {allTags.map(t => (
                 <label key={t.id} className="flex items-center gap-2 text-xs cursor-pointer p-1 hover:bg-gray-50 rounded">
                   <input 
@@ -158,7 +155,7 @@ function CardModal({ card, onClose, refreshBoard }) {
                 </label>
               ))}
             </div>
-            <form onSubmit={createTag} className="flex gap-2">
+            <div className="flex gap-2">
               <input 
                 className="flex-grow p-1 text-xs border rounded" 
                 value={newTag.name} 
@@ -171,20 +168,26 @@ function CardModal({ card, onClose, refreshBoard }) {
                 value={newTag.color} 
                 onChange={e => setNewTag({...newTag, color: e.target.value})} 
               />
-              <button className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Add</button>
-            </form>
+              <button 
+                type="button"
+                onClick={handleCreateTag} 
+                className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+              >
+                Add
+              </button>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Members</label>
-            <div className="flex flex-wrap gap-2 mb-3">
+          <div className="space-y-3">
+            <label className="block text-xs font-bold text-gray-500 uppercase">Members</label>
+            <div className="flex flex-wrap gap-2">
               {members.map(m => (
                 <span key={m.id} className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">
                   {m.name}
                 </span>
               ))}
             </div>
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-1 border rounded">
               {allMembers.map(m => (
                 <label key={m.id} className="flex items-center gap-2 text-xs cursor-pointer p-1 hover:bg-gray-50 rounded">
                   <input 
@@ -201,15 +204,21 @@ function CardModal({ card, onClose, refreshBoard }) {
                 </label>
               ))}
             </div>
-            <form onSubmit={createMember} className="flex gap-2">
+            <div className="flex gap-2">
               <input 
                 className="flex-grow p-1 text-xs border rounded" 
                 value={newMember.name} 
                 onChange={e => setNewMember({name: e.target.value})} 
                 placeholder="New Member Name" 
               />
-              <button className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Add</button>
-            </form>
+              <button 
+                type="button"
+                onClick={handleCreateMember} 
+                className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+              >
+                Add
+              </button>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 mt-6">

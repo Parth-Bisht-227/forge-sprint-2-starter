@@ -45,7 +45,7 @@ class CardController extends Controller
         $validated = $request->validate([
             'title' => 'string|max:255',
             'description' => 'string',
-            'due_date' => 'date',
+            'due_date' => 'nullable',
             'position' => 'integer',
         ]);
 
