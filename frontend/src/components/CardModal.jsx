@@ -92,7 +92,7 @@ function CardModal({ card, onClose, refreshBoard }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh] shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Edit Card</h2>

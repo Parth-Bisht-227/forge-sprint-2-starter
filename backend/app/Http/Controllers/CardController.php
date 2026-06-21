@@ -44,7 +44,7 @@ class CardController extends Controller
         $card = Card::findOrFail($id);
         $validated = $request->validate([
             'title' => 'string|max:255',
-            'description' => 'string',
+            'description' => 'nullable|string',
             'due_date' => 'nullable',
             'position' => 'integer',
         ]);
