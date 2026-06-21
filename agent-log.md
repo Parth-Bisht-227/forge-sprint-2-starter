@@ -37,3 +37,19 @@ The infrastructure drift between the orchestrator and delegated subagents is dee
 Hermes' built-in delegate_task consistently resolves to the wrong filesystem path (Windows path instead of the WSL OpenClaw workspace) and cannot reliably hand off implementation work. This is a platform-level transport issue between Hermes (Windows) and OpenClaw (WSL2), not a configuration error — confirmed via direct testing. 
 
 **Workaround:** human-relayed handoff in Slack — Hermes plans in <#C0BBWE3S7L5>, human relays the approved plan to OpenClaw in <#C0BC1MT7RUZ>, OpenClaw implements and reports back. This preserves the full plan→code→report loop with full visibility, just with a human carrying the message instead of an automated subagent call.
+
+## Final Build Summary
+**Implementation Highlights:**
+- **T1.4 API layer:** Built per Hermes' plan with corrections (move-card payload includes position, no auth/ownership fields).
+- **T1.5 frontend:** Built per Hermes' plan (React/Vite/Tailwind, no routing library, flat component hierarchy).
+
+**Bugfix History (UAT Phase):**
+- **Eager Loading:** Fixed `BoardController@show` by adding `->with(['lists.cards.tags', 'lists.cards.members'])` to ensure the frontend received the full nested board tree.
+- **FK Mismatch:** Resolved a `SQLSTATE` error where Eloquent guessed `board_list_id` for the `BoardList` model. Fixed by explicitly specifying `list_id` in both `hasMany` and `belongsTo` relationships.
+- **Controller Resolution:** Fixed `BindingResolutionException` in `routes/api.php` by adding missing `use` import statements for `TagController` and `MemberController`.
+- **Nested Forms:** Resolved React hydration and UI errors in `CardModal.jsx` by removing nested `<form>` elements and replacing them with `div` wrappers and `onClick` handlers for tag/member creation.
+- **Validation 422s:** Fixed "The description field must be a string" errors by adding `nullable` to validation rules for `description` and `due_date`, accounting for Laravel's `ConvertEmptyStringsToNull` middleware.
+
+**Final Status:**
+- All five required features (Boards→Lists→Cards CRUD, move card between lists, tags, member assignment, due dates with overdue flagging) confirmed working via manual UAT.
+- **Decision:** Project will be delivered via local run + video walkthrough per accepted fallback path, given time constraints.
