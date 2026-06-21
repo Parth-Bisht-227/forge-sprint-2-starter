@@ -7,17 +7,32 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
 function KanbanBoard({ boardId, onBack }) {
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [newListName, setNewListName] = useState('');
 
   const fetchBoard = async () => {
     setLoading(true);
     try {
-      // a la T1.4 corrections: fetch board with nested lists.cards.tags.members
       const res = await axios.get(`${API_BASE_URL}/boards/${boardId}`);
       setBoard(res.data);
     } catch (err) {
       console.error("Failed to fetch board", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const createList = async (e) => {
+    e.preventDefault();
+    if (!newListName) return;
+    try {
+      await axios.post(`${API_BASE_URL}/boards/${boardId}/lists`, { 
+        name: newListName,
+        position: board?.lists?.length || 0 
+      });
+      setNewListName('');
+      fetchBoard();
+    } catch (err) {
+      alert("Error creating list");
     }
   };
 
@@ -47,6 +62,20 @@ function KanbanBoard({ boardId, onBack }) {
             refreshBoard={fetchBoard} 
           />
         ))}
+        <form onSubmit={createList} className="w-60 flex flex-col gap-2">
+          <input 
+            className="p-2 text-sm rounded border bg-white shadow-sm" 
+            value={newListName} 
+            onChange={e => setNewListName(e.target.value)} 
+            placeholder="+ Add List" 
+          />
+          <button 
+            type="submit" 
+            className="text-xs bg-gray-300 p-1 rounded hover:bg-gray-400 text-gray-700"
+          >
+            Add List
+          </button>
+        </form>
       </div>
     </div>
   );

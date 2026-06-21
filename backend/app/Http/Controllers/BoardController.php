@@ -25,7 +25,7 @@ class BoardController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $board = Board::findOrFail($id);
+        $board = Board::with(['lists.cards.tags', 'lists.cards.members'])->findOrFail($id);
         return response()->json($board);
     }
 
