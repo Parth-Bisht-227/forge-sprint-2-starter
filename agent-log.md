@@ -53,3 +53,69 @@ Hermes' built-in delegate_task consistently resolves to the wrong filesystem pat
 **Final Status:**
 - All five required features (Boards→Lists→Cards CRUD, move card between lists, tags, member assignment, due dates with overdue flagging) confirmed working via manual UAT.
 - **Decision:** Project will be delivered via local run + video walkthrough per accepted fallback path, given time constraints.
+
+## [2026-06-25] UI Stabilization and Deployment Prep
+**Task:** Prepare the Forge Sprint 2 Kanban app for resubmission by fixing the highest-impact failure from the first submission: the app was only available on localhost and the live URL was invalid.
+
+**Human Direction**
+The human reviewed the first submission feedback (55/100) and prioritized:
+1. Fix Tailwind/PostCSS so the app no longer looks like unstyled browser-default HTML.
+2. Improve the Kanban UI without breaking core behavior.
+3. Fix card modal UX around close/cancel, tags, and members.
+4. Add board deletion to complete Boards CRUD.
+5. Prepare deployment through Render + Vercel.
+6. Update documentation honestly before resubmission.
+
+**Agent Work**
+OpenClaw was used for implementation inside the WSL2 OpenClaw workspace:
+`/home/openclaw/.openclaw/workspace/forge-sprint2`
+
+**Work Completed:**
+- Diagnosed Tailwind/PostCSS configuration issues (v4 vs v3 conflict).
+- Downgraded to `tailwindcss@3.4.10`, updated `postcss.config.js`.
+- Stabilized frontend build: `npm run build` succeeds consistently.
+- Improved UI: boards page, board detail, lists, cards, tags, members, overdue flagging.
+- Added board deletion with confirmation in `BoardSelector.jsx`.
+- Fixed card modal event propagation:
+  - Modal rendered as sibling to card (not nested inside clickable wrapper).
+  - `onClick` handlers with `e.stopPropagation()` on X, Cancel, and modal panel.
+  - Click-to-close on overlay background only (when `e.target === e.currentTarget`).
+- Created `backend/Dockerfile` for Render deployment.
+- Updated documentation:
+  - `README.md`: Live URL placeholders, Render/Vercel deployment instructions.
+  - `PROJECT.md`: Added Resubmission Progress section.
+  - `ARCHITECTURE.md`: Added Deployment Architecture section.
+
+**Human Verification Notes**
+The human did not blindly accept agent "PASS" reports. Browser screenshots and direct local testing were used to catch issues that code inspection missed:
+- Tailwind classes present but not applied initially.
+- Frontend dev server serving stale code (cached bundles).
+- Card modal rendered inside clickable card wrapper causing close clicks to bubble and reopen the modal.
+- Tag sync alerts persisting after source appeared updated (leading to cache/process verification).
+
+**Current Deployment Plan**
+Backend:
+- Render Web Service
+- Docker-based Laravel deployment (`backend/Dockerfile`)
+- SQLite demo database
+- Required env vars: `APP_KEY`, `APP_ENV=production`, `APP_DEBUG=false`, `DB_CONNECTION=sqlite`, `DB_DATABASE=database/database.sqlite`
+
+Frontend:
+- Vercel
+- Root directory: `frontend`
+- Build command: `npm run build`
+- Output: `dist`
+- Required env var: `VITE_API_URL=https://<render-backend>.onrender.com/api`
+
+**Remaining Before Final Resubmission**
+- Push final bugfix/documentation commits to GitHub.
+- Deploy backend to Render.
+- Deploy frontend to Vercel.
+- Replace README placeholder URLs with actual live URLs.
+- Verify all five required features on the deployed frontend URL:
+  - Boards → Lists → Cards CRUD
+  - Move card between lists
+  - Tags/labels on cards
+  - Member assignment on cards
+  - Due dates + visual overdue flag
+- Resubmit with GitHub repo URL and live URL.
