@@ -44,9 +44,9 @@ function KanbanBoard({ boardId, onBack }) {
   if (!board) return <div className="text-center p-10">Board not found.</div>;
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{board.name}</h1>
+    <div className="h-full flex flex-col bg-gray-50 p-6">
+      <div className="flex justify-between items-center mb-8 max-w-7xl mx-auto w-full">
+        <h1 className="text-3xl font-extrabold text-gray-800">{board.name}</h1>
         <button 
           onClick={onBack} 
           className="text-blue-500 hover:underline"
@@ -54,7 +54,7 @@ function KanbanBoard({ boardId, onBack }) {
           ← Back to Boards
         </button>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 items-start">
+      <div className="flex gap-6 overflow-x-auto pb-4 items-start max-w-7xl mx-auto w-full">
         {board.lists?.map(list => (
           <BoardList 
             key={list.id} 
@@ -63,16 +63,16 @@ function KanbanBoard({ boardId, onBack }) {
             allLists={board.lists} 
           />
         ))}
-        <form onSubmit={createList} className="w-60 flex flex-col gap-2">
+        <form onSubmit={createList} className="w-64 flex flex-col gap-3">
           <input 
-            className="p-2 text-sm rounded border bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400" 
+            className="p-3 text-sm rounded-lg border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-400" 
             value={newListName} 
             onChange={e => setNewListName(e.target.value)} 
             placeholder="+ Add List" 
           />
           <button 
             type="submit" 
-            className="text-xs bg-gray-300 p-1 rounded hover:bg-gray-400 text-gray-700 font-medium"
+            className="text-xs bg-blue-600 p-2 rounded-lg hover:bg-blue-700 text-white font-semibold shadow-sm transition-colors"
           >
             Add List
           </button>

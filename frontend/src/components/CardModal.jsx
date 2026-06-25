@@ -9,17 +9,21 @@ function CardModal({ card, onClose, refreshBoard }) {
     description: card.description || '',
     due_date: card.due_date || '',
   });
-  const [tags, setTags] = useState([]);
-  const [members, setMembers] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [allMembers, setAllMembers] = useState([]);
   
   const [newTag, setNewTag] = useState({ name: '', color: '#3b82f6' });
   const [newMember, setNewMember] = useState({ name: '' });
+  const [localTagIds, setLocalTagIds] = useState([]);
+  const [localMemberIds, setLocalMemberIds] = useState([]);
+  const [tagError, setTagError] = useState('');
+  const [memberError, setMemberError] = useState('');
 
   useEffect(() => {
-    setTags(card.tags || []);
-    setMembers(card.members || []);
+    const cardTags = card.tags || [];
+    const cardMembers = card.members || [];
+    setLocalTagIds(cardTags.map(t => t.id));
+    setLocalMemberIds(cardMembers.map(m => m.id));
     
     const fetchData = async () => {
       try {
@@ -39,43 +43,57 @@ function CardModal({ card, onClose, refreshBoard }) {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
+      // First update card fields
       await axios.put(`${API_BASE_URL}/cards/${card.id}`, formData);
+      
+      // Then sync tags and members if there are changes
+      if (localTagIds.length > 0) {
+        try {
+          await axios.post(`${API_BASE_URL}/cards/${card.id}/tags`, { tag_ids: localTagIds });
+        } catch (err) {
+          console.error("Tag sync failed:", err);
+          setTagError("Failed to sync tags");
+        }
+      }
+      if (localMemberIds.length > 0) {
+        try {
+          await axios.post(`${API_BASE_URL}/cards/${card.id}/members`, { member_ids: localMemberIds });
+        } catch (err) {
+          console.error("Member sync failed:", err);
+          setMemberError("Failed to sync members");
+        }
+      }
+      
       onClose();
       refreshBoard();
     } catch (err) {
-      alert("Error updating card");
+      console.error("Error updating card:", err);
     }
   };
 
-  const syncTags = async (tagIds) => {
-    try {
-      await axios.post(`${API_BASE_URL}/cards/${card.id}/tags`, { tag_ids: tagIds });
-      setTags(tagIds.map(id => allTags.find(t => t.id === id) || { id, name: 'Loading...' }));
-      refreshBoard();
-    } catch (err) {
-      alert("Error syncing tags");
-    }
+  const handleTagToggle = (tagId, isChecked) => {
+    setLocalTagIds(prev =>
+      isChecked ? [...prev, tagId] : prev.filter(id => id !== tagId)
+    );
   };
 
-  const syncMembers = async (memberIds) => {
-    try {
-      await axios.post(`${API_BASE_URL}/cards/${card.id}/members`, { member_ids: memberIds });
-      setMembers(memberIds.map(id => allMembers.find(m => m.id === id) || { id, name: 'Loading...' }));
-      refreshBoard();
-    } catch (err) {
-      alert("Error syncing members");
-    }
+  const handleMemberToggle = (memberId, isChecked) => {
+    setLocalMemberIds(prev =>
+      isChecked ? [...prev, memberId] : prev.filter(id => id !== memberId)
+    );
   };
 
   const handleCreateTag = async () => {
     if (!newTag.name) return;
     try {
       const res = await axios.post(`${API_BASE_URL}/tags`, newTag);
-      setAllTags([...allTags, res.data]);
+      setAllTags(prev => [...prev, res.data]);
       setNewTag({ name: '', color: '#3b82f6' });
-      syncTags([...tags.map(t => t.id), res.data.id]);
+      setLocalTagIds(prev => [...prev, res.data.id]);
+      setTagError('');
     } catch (err) {
-      alert("Error creating tag");
+      console.error("Error creating tag:", err);
+      setTagError("Could not create tag");
     }
   };
 
@@ -83,20 +101,36 @@ function CardModal({ card, onClose, refreshBoard }) {
     if (!newMember.name) return;
     try {
       const res = await axios.post(`${API_BASE_URL}/members`, newMember);
-      setAllMembers([...allMembers, res.data]);
+      setAllMembers(prev => [...prev, res.data]);
       setNewMember({ name: '' });
-      syncMembers([...members.map(m => m.id), res.data.id]);
+      setLocalMemberIds(prev => [...prev, res.data.id]);
+      setMemberError('');
     } catch (err) {
-      alert("Error creating member");
+      console.error("Error creating member:", err);
+      setMemberError("Could not create member");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh] shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+         onClick={(e) => {
+           if (e.target === e.currentTarget) {
+             e.preventDefault();
+             e.stopPropagation();
+             onClose();
+           }
+         }}>
+      <div className="bg-white rounded-xl w-full max-w-md p-6 overflow-y-auto max-h-[90vh] shadow-2xl"
+           onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Edit Card</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+          <button type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+            }}
+            className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
         </div>
         
         <form onSubmit={handleUpdate} className="flex flex-col gap-6">
@@ -130,8 +164,8 @@ function CardModal({ card, onClose, refreshBoard }) {
           
           <div className="space-y-3">
             <label className="block text-xs font-bold text-gray-500 uppercase">Tags</label>
-            <div className="flex flex-wrap gap-2">
-              {tags.map(t => (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {allTags.filter(t => localTagIds.includes(t.id)).map(t => (
                 <span key={t.id} className="text-xs px-2 py-1 rounded-full text-white" style={{backgroundColor: t.color}}>
                   {t.name}
                 </span>
@@ -142,19 +176,15 @@ function CardModal({ card, onClose, refreshBoard }) {
                 <label key={t.id} className="flex items-center gap-2 text-xs cursor-pointer p-1 hover:bg-gray-50 rounded">
                   <input 
                     type="checkbox" 
-                    checked={tags.some(existing => existing.id === t.id)} 
-                    onChange={e => {
-                      const newIds = e.target.checked 
-                        ? [...tags.map(existing => existing.id), t.id]
-                        : tags.filter(existing => existing.id !== t.id).map(existing => existing.id);
-                      syncTags(newIds);
-                    }} 
+                    checked={localTagIds.includes(t.id)} 
+                    onChange={e => handleTagToggle(t.id, e.target.checked)} 
                   />
                   <span className="w-2 h-2 rounded-full" style={{backgroundColor: t.color}}></span>
                   {t.name}
                 </label>
               ))}
             </div>
+            {tagError && <p className="text-xs text-red-500">{tagError}</p>}
             <div className="flex gap-2">
               <input 
                 className="flex-grow p-1 text-xs border rounded" 
@@ -180,11 +210,14 @@ function CardModal({ card, onClose, refreshBoard }) {
 
           <div className="space-y-3">
             <label className="block text-xs font-bold text-gray-500 uppercase">Members</label>
-            <div className="flex flex-wrap gap-2">
-              {members.map(m => (
-                <span key={m.id} className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700 font-medium">
+            <div className="flex flex-wrap gap-2 mb-3">
+              {allMembers.filter(m => localMemberIds.includes(m.id)).map(m => (
+                <div key={m.id} className="flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-[10px] font-medium border border-gray-200">
+                  <div className="w-4 h-4 rounded-full bg-blue-500 text-white text-[8px] flex items-center justify-center uppercase">
+                    {m.name.charAt(0)}
+                  </div>
                   {m.name}
-                </span>
+                </div>
               ))}
             </div>
             <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-1 border rounded">
@@ -192,18 +225,14 @@ function CardModal({ card, onClose, refreshBoard }) {
                 <label key={m.id} className="flex items-center gap-2 text-xs cursor-pointer p-1 hover:bg-gray-50 rounded">
                   <input 
                     type="checkbox" 
-                    checked={members.some(existing => existing.id === m.id)} 
-                    onChange={e => {
-                      const newIds = e.target.checked 
-                        ? [...members.map(existing => existing.id), m.id]
-                        : members.filter(existing => existing.id !== m.id).map(existing => existing.id);
-                      syncMembers(newIds);
-                    }} 
+                    checked={localMemberIds.includes(m.id)} 
+                    onChange={e => handleMemberToggle(m.id, e.target.checked)} 
                   />
                   {m.name}
                 </label>
               ))}
             </div>
+            {memberError && <p className="text-xs text-red-500">{memberError}</p>}
             <div className="flex gap-2">
               <input 
                 className="flex-grow p-1 text-xs border rounded" 
@@ -224,7 +253,11 @@ function CardModal({ card, onClose, refreshBoard }) {
           <div className="flex justify-end gap-2 mt-6">
             <button 
               type="button" 
-              onClick={onClose} 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+              }}
               className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium"
             >
               Cancel

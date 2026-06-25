@@ -20,25 +20,46 @@ function BoardSelector({ onSelectBoard }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">My Kanban Boards</h1>
-      <form onSubmit={createBoard} className="mb-8 flex gap-2">
+    <div className="min-h-screen bg-gray-50 p-8 font-sans">
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">My Kanban Boards</h1>
+        <div className="flex gap-2">
+          {/* No Global Board Action here yet */}
+        </div>
+      </div>
+      <form onSubmit={createBoard} className="mb-12 flex gap-3 max-w-lg">
         <input 
-          className="p-2 border rounded flex-grow" 
+          className="p-3 border border-gray-300 rounded-lg flex-grow shadow-sm focus:ring-2 focus:ring-blue-400 outline-none bg-white" 
           value={newName} 
           onChange={(e) => setNewName(e.target.value)} 
-          placeholder="Board Name..." 
+          placeholder="Enter board name..." 
         />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Create Board</button>
+        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm">Create Board</button>
       </form>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {boards.map(board => (
           <div 
             key={board.id} 
+            className="group relative p-6 bg-white rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md hover:bg-blue-50/30 transition-all duration-200"
             onClick={() => onSelectBoard(board.id)}
-            className="p-4 bg-white rounded shadow cursor-pointer hover:bg-gray-50 transition"
           >
-            <h3 className="font-semibold text-lg">{board.name}</h3>
+            <div className="flex justify-between items-start">
+              <h3 className="font-bold text-xl text-gray-800 group-hover:text-blue-600 transition-colors">{board.name}</h3>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if(confirm("Delete this board and all its contents?")) {
+                    axios.delete(`${API_BASE_URL}/boards/${board.id}`).then(() => {
+                      axios.get(`${API_BASE_URL}/boards`).then(res => setBoards(res.data));
+                    });
+                  }
+                }}
+                className="text-gray-400 hover:text-red-500 p-1 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">Click to manage cards →</p>
           </div>
         ))}
       </div>

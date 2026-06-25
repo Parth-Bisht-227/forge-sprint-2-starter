@@ -33,9 +33,9 @@ function BoardList({ list, refreshBoard, allLists }) {
   };
 
   return (
-    <div className="w-80 bg-gray-200 rounded-lg p-3 flex flex-col max-h-full">
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="font-bold text-gray-700 uppercase text-sm tracking-wider">{list.name}</h2>
+    <div className="w-80 bg-gray-100 rounded-xl p-4 flex flex-col max-h-full shadow-inner border border-gray-200">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="font-bold text-gray-800 uppercase text-xs tracking-widest">{list.name}</h2>
         <button 
           onClick={deleteList} 
           className="text-gray-400 hover:text-red-500 p-1 text-xs"
@@ -44,7 +44,7 @@ function BoardList({ list, refreshBoard, allLists }) {
           ✕
         </button>
       </div>
-      <div className="flex flex-col gap-3 overflow-y-auto mb-4">
+      <div className="flex flex-col gap-3 overflow-y-auto mb-4 pr-1">
         {list.cards?.map(card => (
           <Card 
             key={card.id} 
@@ -54,9 +54,9 @@ function BoardList({ list, refreshBoard, allLists }) {
           />
         ))}
       </div>
-      <form onSubmit={addCard} className="mt-auto">
+      <form onSubmit={addCard} className="mt-auto pt-2">
         <input 
-          className="w-full p-2 text-sm rounded border-none shadow-sm focus:ring-2 focus:ring-blue-400" 
+          className="w-full p-2.5 text-sm rounded-lg border-none shadow-sm bg-white focus:ring-2 focus:ring-blue-400 placeholder-gray-500" 
           value={newCardTitle} 
           onChange={e => setNewCardTitle(e.target.value)} 
           placeholder="+ Add a card" 
