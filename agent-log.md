@@ -87,7 +87,7 @@ OpenClaw was used for implementation inside the WSL2 OpenClaw workspace:
   - `ARCHITECTURE.md`: Added Deployment Architecture section.
 
 **Human Verification Notes**
-The human did not blindly accept agent "PASS" reports. Browser screenshots and direct local testing were used to catch issues that code inspection missed:
+The human did not blindly la- accept agent "PASS" reports. Browser screenshots and direct local testing were used to catch issues that code inspection missed:
 - Tailwind classes present but not applied initially.
 - Frontend dev server serving stale code (cached bundles).
 - Card modal rendered inside clickable card wrapper causing close clicks to bubble and reopen the modal.
@@ -114,8 +114,46 @@ Frontend:
 - Replace README placeholder URLs with actual live URLs.
 - Verify all five required features on the deployed frontend URL:
   - Boards → Lists → Cards CRUD
-  - Move card between lists
+  - la- Move card between lists
   - Tags/labels on cards
   - Member assignment on cards
   - Due dates + visual overdue flag
 - Resubmit with GitHub repo URL and live URL.
+
+## 2026-06-25 — Live Deployment and Final Resubmission Update
+**Goal**
+Finish the Forge Sprint 2 resubmission by replacing the localhost-only first submission with a real deployed app and documenting the final deployment state.
+
+**What Changed Since the First Submission**
+The first submission scored 55/100 and failed mainly because the submitted live URL was localhost and no deployed backend was available. For the resubmission:
+- The Laravel backend was deployed to Render.
+- The React/Vite frontend was deployed to Vercel.
+- The frontend was configured with `VITE_API_URL=https://forge-sprint-2-api.onrender.com/api`.
+- Sanitized OpenClaw and Hermes config example files remained committed.
+- Tailwind/PostCSS was fixed so the UI renders properly.
+- The UI was improved from browser-default HTML to a usable Kanban interface.
+- Board deletion was added.
+- Card modal close/cancel behavior was fixed.
+- Tags, members, due dates, and overdue styling were verified from the deployed frontend.
+
+**Live URLs**
+- Frontend: https://forge-sprint-2-frontend.vercel.app/
+- Backend API: https://forge-sprint-2-api.onrender.com
+- Backend test endpoint: https://forge-sprint-2-api.onrender.com/api/boards
+
+**Human Verification**
+The human verified the deployed Vercel app rather than localhost. Final manual checks covered:
+1. Boards → Lists → Cards CRUD
+2. Moving cards between lists
+3. Tags/labels on cards
+4. Member assignment on cards
+5. Due dates and visual overdue flag
+6. Board deletion
+7. Edit Card modal X/Cancel/Save behavior
+8. Render backend returning JSON from `/api/boards`
+
+**Workflow Note**
+The project remained human-in-the-loop. Hermes was used for planning/review, the human relayed tasks, and OpenClaw handled implementation in the WSL2 workspace where available. During late resubmission work, OpenClaw cloud/session limits were hit, so the human used direct local verification and targeted assistance to finish deployment-pressure tasks while keeping documentation honest.
+
+**Remaining Notes**
+Render free-tier cold starts may delay the first backend request after inactivity. This is acceptable for the hackathon demo.

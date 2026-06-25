@@ -3,8 +3,18 @@
 A minimal, high-performance Trello-style Kanban board implementation designed to demonstrate a decoupled architecture between a Laravel API and a React frontend.
 
 ## Live Demo
-- **Frontend:** FRONTEND_LIVE_URL_TBD
-- **Backend API:** BACKEND_API_URL_TBD
+- **Frontend:** https://forge-sprint-2-frontend.vercel.app/
+- **Backend API:** https://forge-sprint-2-api.onrender.com
+- **Backend test endpoint:** https://forge-sprint-2-api.onrender.com/api/boards
+- **Status:** deployed for Forge Sprint 2 resubmission.
+
+## Required Features
+- ✅ Boards → Lists → Cards CRUD
+- ✅ Move cards between lists
+- ✅ Tags/labels on cards
+- ✅ Member assignment on cards
+- ✅ Due dates with visual overdue flag
+- ✅ Board deletion for complete board CRUD
 
 ## Deployment Target
 - **Frontend:** Vercel, root directory `frontend`
@@ -69,7 +79,7 @@ Use a Vercel project connected to this GitHub repo.
 - Output directory: `dist`
 
 **Required environment variable:**
-- `VITE_API_URL`: `https://<render-backend-service>.onrender.com/api`
+- `VITE_API_URL`: `https://forge-sprint-2-api.onrender.com/api`
 
 ## Workflow Note
 This project utilized a specialized two-agent workflow. Due to a platform-level transport limitation with `delegate_task` (path drift between Windows and WSL2), planning and implementation were synchronized via human-relayed handoffs in Slack, preserving the full plan $\to$ code $\to$ report loop. See `ARCHITECTURE.md` for further details.

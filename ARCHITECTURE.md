@@ -21,3 +21,15 @@ The system follows a decoupled architecture with a Laravel API and a React-based
 - `members`: `id`, `name`, `timestamps`
 - `card_tag`: `card_id` (FK), `tag_id` (FK) — Pivot table
 - `card_member`: `card_id` (FK), `member_id` (FK) — Pivot table
+
+## Deployment Architecture
+```
+User Browser
+ ↓
+Vercel-hosted React/Vite frontend
+ ↓ VITE_API_URL
+Render-hosted Laravel API
+ ↓
+SQLite database file
+```
+The frontend is a static Vite build deployed on Vercel. The backend is a Laravel API deployed as a Render Docker Web Service. The frontend calls the backend through `VITE_API_URL=https://forge-sprint-2-api.onrender.com/api`.

@@ -8,19 +8,13 @@ Initialize a robust foundation for the Forge Sprint 2 project, focusing on struc
 - Production-ready implementation standards.
 - Comprehensive audit trail via `agent-log.md`.
 
-## Resubmission Progress
-The first Forge Sprint 2 submission scored 55/100 and failed mainly because the submitted app URL was localhost rather than a live deployment. The resubmission work focused on the highest-impact blockers:
-- Added sanitized OpenClaw and Hermes config example files.
-- Fixed Tailwind/PostCSS so the frontend builds with visible styling.
-- Improved the Kanban UI while preserving the required app behavior.
-- Added board deletion to complete Boards CRUD.
-- Fixed card modal UX around close/cancel, tags, and member assignment.
-- Prepared backend/frontend deployment path using Render + Vercel.
-- Kept the documented human-in-the-loop workflow: Hermes for planning/review, human relay, OpenClaw for implementation.
+## Final Resubmission Status
+The app is now deployed live:
+- **Frontend:** https://forge-sprint-2-frontend.vercel.app/
+- **Backend API:** https://forge-sprint-2-api.onrender.com
 
-Remaining before resubmission:
-- Deploy backend to Render.
-- Deploy frontend to Vercel.
-- Replace placeholder live URLs in README.
-- Verify all five required features on the deployed URL.
-- Submit the updated repo URL and live URL.
+The main blockers from the first 55/100 submission have been addressed:
+- The submitted app is no longer localhost-only.
+- The backend is deployed.
+- Sanitized config examples are committed.
+- The required Kanban features have and live verified.
