@@ -1,0 +1,286 @@
+{
+  "gateway": {
+    "mode": "local",
+    "port": 18789,
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "YOUR_TOKEN"
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send",
+        "sms.search"
+      ]
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "controlUi": {
+      "allowInsecureAuth": true
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "/home/openclaw/.openclaw/workspace",
+      "model": {
+        "primary": "ollama-cloud/gemma4:31b",
+        "fallbacks": [
+          "ollama-cloud/kimi-k2.5:cloud",
+          "ollama-cloud/qwen3-coder-next"
+        ]
+      },
+      "models": {
+        "google/gemini-3.1-pro-preview": {},
+        "ollama-cloud/kimi-k2.5:cloud": {},
+        "ollama-cloud/qwen3-coder-next": {},
+        "ollama-cloud/gemma4:31b": {}
+      }
+    }
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "tools": {
+    "profile": "coding",
+    "web": {
+      "search": {
+        "provider": "ollama",
+        "enabled": true
+      }
+    },
+    "allow": [],
+    "alsoAllow": [
+      "group:messaging"
+    ]
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.6.9",
+    "lastTouchedAt": "2026-06-25T12:24:01.943Z"
+  },
+  "plugins": {
+    "entries": {
+      "ollama": {
+        "enabled": true
+      },
+      "groq": {
+        "enabled": true
+      },
+      "device-pair": {
+        "config": {
+          "publicUrl": "ws://127.0.0.1:18789"
+        },
+        "enabled": true
+      },
+      "google": {
+        "enabled": true
+      },
+      "slack": {
+        "enabled": true
+      }
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-06-21T13:52:40.576Z",
+    "lastRunVersion": "2026.6.9",
+    "lastRunCommand": "configure",
+    "lastRunMode": "local"
+  },
+  "skills": {
+    "entries": {
+      "1password": "YOUR_1PASSWORD",
+      "apple-notes": {
+        "enabled": false
+      },
+      "apple-reminders": {
+        "enabled": false
+      },
+      "bear-notes": {
+        "enabled": false
+      },
+      "blogwatcher": {
+        "enabled": false
+      },
+      "blucli": {
+        "enabled": false
+      },
+      "camsnap": {
+        "enabled": false
+      },
+      "clawhub": {
+        "enabled": false
+      },
+      "coding-agent": {
+        "enabled": false
+      },
+      "discord": {
+        "enabled": false
+      },
+      "eightctl": {
+        "enabled": false
+      },
+      "gemini": {
+        "enabled": false
+      },
+      "gh-issues": {
+        "enabled": false
+      },
+      "gifgrep": {
+        "enabled": false
+      },
+      "github": {
+        "enabled": false
+      },
+      "gog": {
+        "enabled": false
+      },
+      "goplaces": {
+        "enabled": false
+      },
+      "himalaya": {
+        "enabled": false
+      },
+      "imsg": {
+        "enabled": false
+      },
+      "mcporter": {
+        "enabled": false
+      },
+      "model-usage": {
+        "enabled": false
+      },
+      "nano-pdf": {
+        "enabled": false
+      },
+      "obsidian": {
+        "enabled": false
+      },
+      "openai-whisper": {
+        "enabled": false
+      },
+      "openai-whisper-api": {
+        "enabled": false
+      },
+      "openhue": {
+        "enabled": false
+      },
+      "oracle": {
+        "enabled": false
+      },
+      "ordercli": {
+        "enabled": false
+      },
+      "peekaboo": {
+        "enabled": false
+      },
+      "sag": {
+        "enabled": false
+      },
+      "session-logs": {
+        "enabled": false
+      },
+      "sherpa-onnx-tts": {
+        "enabled": false
+      },
+      "slack": {
+        "enabled": false
+      },
+      "songsee": {
+        "enabled": false
+      },
+      "sonoscli": {
+        "enabled": false
+      },
+      "spotify-player": {
+        "enabled": false
+      },
+      "summarize": {
+        "enabled": false
+      },
+      "things-mac": {
+        "enabled": false
+      },
+      "trello": {
+        "enabled": false
+      },
+      "video-frames": {
+        "enabled": false
+      },
+      "voice-call": {
+        "enabled": false
+      },
+      "wacli": {
+        "enabled": false
+      },
+      "xurl": {
+        "enabled": false
+      }
+    }
+  },
+  "auth": {
+    "profiles": {
+      "google:default": {
+        "provider": "google",
+        "mode": "api_key"
+      },
+      "ollama-cloud:default": {
+        "provider": "ollama-cloud",
+        "mode": "api_key"
+      }
+    }
+  },
+  "channels": {
+    "slack": {
+      "enabled": true,
+      "accounts": {
+        "default": {},
+        "forge": {
+          "enabled": true,
+          "botToken": "YOUR_BOTTOKEN",
+          "appToken": "YOUR_APPTOKEN",
+          "groupPolicy": "open",
+          "channels": {
+            "C0BBTH42HGT": {
+              "enabled": true
+            },
+            "C0BC1MT7RUZ": {
+              "enabled": true
+            },
+            "C0BC3FKPY0L": {
+              "enabled": true
+            },
+            "C0BBJC71WAK": {
+              "enabled": true
+            },
+            "C0BC3FLCYJG": {
+              "enabled": true
+            },
+            "C0BBWE3S7L5": {
+              "enabled": true
+            }
+          },
+          "capabilities": {
+            "interactiveReplies": true
+          },
+          "allowBots": "mentions"
+        }
+      }
+    }
+  },
+  "bindings": [
+    {
+      "agentId": "main",
+      "match": {
+        "channel": "slack",
+        "accountId": "forge"
+      }
+    }
+  ]
+}

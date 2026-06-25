@@ -1,0 +1,22 @@
+
+# Local secrets
+.env
+*.env
+backend/.env
+frontend/.env
+frontend/.env.local
+frontend/.env.production.local
+
+# Local DB/runtime files
+backend/database/*.sqlite
+backend/database/*.db
+backend/storage/logs/*.log
+
+# Dependencies/build artifacts
+backend/vendor/
+frontend/node_modules/
+frontend/dist/
+
+# Raw local agent configs - only sanitized examples should be committed
+openclaw.json
+config.yaml
